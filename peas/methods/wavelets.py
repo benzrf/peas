@@ -14,7 +14,7 @@ import numpy as np
 import scipy.misc
 
 # Local
-from ..networks.rnn import NeuralNetwork
+from peas.networks.rnn import NeuralNetwork
 
 # Shortcuts
 rand = np.random.random
@@ -60,8 +60,8 @@ class WaveletGenotype(object):
         self.stdev_mutate = stdev_mutate
         self.wavelets     = [[]] * layers # Each defined by an affine matrix.
         
-        for _ in xrange(initial):
-            for l in xrange(layers):
+        for _ in range(initial):
+            for l in range(layers):
                 self.add_wavelet(l)
                 if add_initial_uniform:
                     self.add_wavelet(l, uniform=True)
@@ -155,4 +155,4 @@ class WaveletDeveloper(object):
         
 if __name__ == '__main__':
     x, y = np.meshgrid(np.linspace(0,6,4), np.linspace(0,6,4))
-    print x, y
+    print(x, y)

@@ -14,7 +14,7 @@ from peas.tasks.xor import XORTask
 # instance each time it is called)
 genotype = lambda: NEATGenotype(inputs=2, 
                                 weight_range=(-3., 3.), 
-                                types=['sigmoid2'])
+                                types=['tanh'])
 
 # Create a population
 pop = NEATPopulation(genotype, popsize=150)
@@ -24,9 +24,9 @@ task = XORTask()
 
 nodecounts = defaultdict(int)
 
-for i in xrange(100):
+for i in range(100):
 	# Run the evolution, tell it to use the task as an evaluator
 	pop.epoch(generations=100, evaluator=task, solution=task)
 	nodecounts[len(pop.champions[-1].node_genes)] += 1
 
-print sorted(nodecounts.items())
+print(sorted(nodecounts.items()))

@@ -3,13 +3,13 @@
 """
 
 ### IMPORTS ###
-from itertools import product, izip
+from itertools import product
 
 # Libs
 import numpy as np
 
 # Local
-from ..networks.rnn import NeuralNetwork
+from peas.networks.rnn import NeuralNetwork
 
 # Shortcuts
 inf = float('inf')
@@ -51,7 +51,7 @@ class Substrate(object):
             # Create coordinate grids
             newnodes = np.mgrid[[slice(-1, 1, s*1j) for s in nodes_or_shape]]
             # Move coordinates to last dimension
-            newnodes = newnodes.transpose(range(1,len(nodes_or_shape)+1) + [0])
+            newnodes = newnodes.transpose(list(range(1,len(nodes_or_shape)+1)) + [0])
             # Reshape to a N x nD list.
             newnodes = newnodes.reshape(-1, len(nodes_or_shape))
             self.dimensions = len(nodes_or_shape)
@@ -83,7 +83,7 @@ class Substrate(object):
             to use for the weight.
         """
         conns = product( self.layers[from_layer], self.layers[to_layer] )
-        conns = filter(lambda (fr, to): np.all(np.abs(self.nodes[fr] - self.nodes[to]) <=  max_length), conns)
+        conns = [fr_to for fr_to in conns if np.all(np.abs(self.nodes[fr_to[0]] - self.nodes[fr_to[1]]) <=  max_length)]
         self.connections.extend(conns)
         self.connection_ids.extend([connection_id] * len(conns))
         self.linkexpression_ids.extend([link_expression_id] * len(conns))
@@ -95,7 +95,7 @@ class Substrate(object):
         if not hasattr(self, '_connection_list'):
             
             self._connection_list = []
-            for ((i, j), conn_id, expr_id) in izip(self.connections, self.connection_ids, self.linkexpression_ids):
+            for ((i, j), conn_id, expr_id) in zip(self.connections, self.connection_ids, self.linkexpression_ids):
                 fr = self.nodes[i]
                 to = self.nodes[j]
                 if add_deltas:

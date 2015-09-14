@@ -1,1 +1,1 @@
-from rnn import NeuralNetwork
+from .rnn import NeuralNetwork

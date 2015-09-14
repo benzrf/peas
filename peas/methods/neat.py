@@ -17,7 +17,7 @@ np.seterr(over='warn', divide='raise')
 
 # Package
 from .evolution import SimplePopulation
-from ..networks.rnn import NeuralNetwork
+from peas.networks.rnn import NeuralNetwork
 
 # Shortcuts
 rand = random.random
@@ -106,7 +106,7 @@ class NEATGenotype(object):
         if self.bias_as_node:
             self.inputs += 1
             
-        max_layer = sys.maxint if (self.max_depth is None) else (self.max_depth - 1)
+        max_layer = sys.maxsize if (self.max_depth is None) else (self.max_depth - 1)
         
         if topology is None:
             # The default method of creating a genotype
@@ -115,32 +115,32 @@ class NEATGenotype(object):
             # to the output node.
             
             # Create input nodes
-            for i in xrange(self.inputs):
+            for i in range(self.inputs):
                 # We set the 'response' to 4.924273. Stanley doesn't mention having the response
                 # be subject to evolution, so this is #weird, but we'll do it because neat-python does.
                 self.node_genes.append( [i * 1024.0, types[0], 0.0, self.response_default, 0] )
             
             # Create output nodes
-            for i in xrange(self.outputs):
+            for i in range(self.outputs):
                 self.node_genes.append( [(self.inputs + i) * 1024.0, random.choice(self.types), 
                                             0.0, self.response_default, max_layer] )
             
             # Create connections from each input to each output
             innov = 0
-            for i in xrange(self.inputs):
-                for j in xrange(self.inputs, self.inputs + self.outputs):
+            for i in range(self.inputs):
+                for j in range(self.inputs, self.inputs + self.outputs):
                     self.conn_genes[(i, j)] = [innov, i, j, np.random.normal(0.0, self.initial_weight_stdev), True]
                     innov += 1
         else:
             # If an initial topology is given, use that:
-            fr, to = zip(*topology)
+            fr, to = list(zip(*topology))
             maxnode = max(max(fr), max(to))
 
             if maxnode + 1 < inputs + outputs:
                 raise Exception("Topology (%d) contains fewer than inputs (%d) + outputs (%d) nodes." % 
                     (maxnode, inputs, outputs))
                 
-            for i in xrange(maxnode+1):
+            for i in range(maxnode+1):
                 # Assign layer 0 to input nodes, otherwise just an incrementing number,
                 # i.e. each node is on its own layer.
                 layer = 0 if i < inputs else i + 1
@@ -156,10 +156,10 @@ class NEATGenotype(object):
             add connection operations will be added to it,
             and checked to ensure identical innovation numbers.
         """
-        maxinnov = max(global_innov, max(cg[0] for cg in self.conn_genes.values()))
+        maxinnov = max(global_innov, max(cg[0] for cg in list(self.conn_genes.values())))
         
         if len(self.node_genes) < self.max_nodes and rand() < self.prob_add_node:
-            possible_to_split = self.conn_genes.keys()
+            possible_to_split = list(self.conn_genes.keys())
             # If there is a max depth, we can only split connections that skip a layer.
             # E.g. we can split a connection from layer 0 to layer 2, because the resulting
             # node would be in layer 1. We cannot split a connection from layer 1 to layer 2,
@@ -199,7 +199,7 @@ class NEATGenotype(object):
         # This is #weird, why use "elif"? but this is what
         # neat-python does, so I'm copying.
         elif rand() < self.prob_add_conn:
-            potential_conns = product(xrange(len(self.node_genes)), xrange(self.inputs, len(self.node_genes)))
+            potential_conns = product(range(len(self.node_genes)), range(self.inputs, len(self.node_genes)))
             potential_conns = (c for c in potential_conns if c not in self.conn_genes)
             # Filter further connections if we're looking only for FF networks
             if self.feedforward:
@@ -223,7 +223,7 @@ class NEATGenotype(object):
                 self.conn_genes[(fr, to)] = conn_gene
             
         else:
-            for cg in self.conn_genes.values():
+            for cg in list(self.conn_genes.values()):
                 if rand() < self.prob_mutate_weight:
                     cg[3] += np.random.normal(0, self.stdev_mutate_weight)
                     cg[3] = np.clip(cg[3], self.weight_range[0], self.weight_range[1])
@@ -277,9 +277,9 @@ class NEATGenotype(object):
             child.node_genes.append(deepcopy(ng))
                 
         # index the connections by innov numbers
-        self_conns = dict( ((c[0], c) for c in self.conn_genes.values()) )
-        other_conns = dict( ((c[0], c) for c in other.conn_genes.values()) )
-        maxinnov = max( self_conns.keys() + other_conns.keys() )
+        self_conns = dict( ((c[0], c) for c in list(self.conn_genes.values())) )
+        other_conns = dict( ((c[0], c) for c in list(other.conn_genes.values())) )
+        maxinnov = max( list(self_conns.keys()) + list(other_conns.keys()) )
         
         for i in range(maxinnov+1):
             cg = None
@@ -298,11 +298,12 @@ class NEATGenotype(object):
                 child.conn_genes[(cg[1], cg[2])][4] = enabled or rand() < self.prob_reenable_parent
 
         # Filter out connections that would become recursive in the new individual.
-        def is_feedforward(((fr, to), cg)):
+        def is_feedforward(xxx_todo_changeme):
+            ((fr, to), cg) = xxx_todo_changeme
             return child.node_genes[fr][0] < child.node_genes[to][0]
 
         if self.feedforward:
-            child.conn_genes = dict(filter(is_feedforward, child.conn_genes.items()))
+            child.conn_genes = dict(list(filter(is_feedforward, list(child.conn_genes.items()))))
         
         return child
         
@@ -310,10 +311,10 @@ class NEATGenotype(object):
         """ NEAT's compatibility distance
         """
         # index the connections by innov numbers
-        self_conns = dict( ((c[0], c) for c in self.conn_genes.itervalues()) )
-        other_conns = dict( ((c[0], c) for c in other.conn_genes.itervalues()) )
+        self_conns = dict( ((c[0], c) for c in self.conn_genes.values()) )
+        other_conns = dict( ((c[0], c) for c in other.conn_genes.values()) )
         # Select connection genes from parents
-        allinnovs = self_conns.keys() + other_conns.keys()
+        allinnovs = list(self_conns.keys()) + list(other_conns.keys())
         mininnov = min(allinnovs)
         
         e = 0
@@ -351,13 +352,13 @@ class NEATGenotype(object):
         # Assemble connectivity matrix
         cm = np.zeros((len(self.node_genes), len(self.node_genes)))
         cm.fill(np.nan)
-        for (_, fr, to, weight, enabled) in self.conn_genes.itervalues():
+        for (_, fr, to, weight, enabled) in self.conn_genes.values():
             if enabled:
                 cm[to, fr] = weight
         
         # Reorder the nodes/connections
-        ff, node_types, bias, response, layer = zip(*self.node_genes)
-        order = [i for _,i in sorted(zip(ff, xrange(len(ff))))]
+        ff, node_types, bias, response, layer = list(zip(*self.node_genes))
+        order = [i for _,i in sorted(zip(ff, range(len(ff))))]
         cm = cm[:,order][order,:]
         node_types = np.array(node_types)[order]
         bias = np.array(bias)[order]
@@ -378,9 +379,9 @@ class NEATGenotype(object):
             import pprint
             pprint.pprint(self.node_genes)
             pprint.pprint(self.conn_genes)
-            print ff
-            print order
-            print np.sign(cm)
+            print(ff)
+            print(order)
+            print(np.sign(cm))
             raise Exception("Network is not feedforward.")
         
         return cm, node_types
@@ -499,7 +500,7 @@ class NEATPopulation(SimplePopulation):
                 self.species.append(s)
         
         # Remove empty species
-        self.species = filter(lambda s: len(s.members) > 0, self.species)
+        self.species = [s for s in self.species if len(s.members) > 0]
         
         # Ajust compatibility_threshold
         if len(self.species) < self.target_species:
@@ -525,7 +526,7 @@ class NEATPopulation(SimplePopulation):
         # Remove stagnated species
         # This is implemented as in neat-python, which resets the
         # no_improvement_age when the average increases
-        self.species = filter(lambda s: s.no_improvement_age < self.stagnation_age or s.has_best, self.species)
+        self.species = [s for s in self.species if s.no_improvement_age < self.stagnation_age or s.has_best]
         
         # Average fitness of each species
         avg_fitness = np.array([specie.avg_fitness for specie in self.species])
@@ -544,7 +545,7 @@ class NEATPopulation(SimplePopulation):
             specie.offspring = int(round(self.popsize * specie.avg_fitness / total_average))
         
         # Remove species without offspring
-        self.species = filter(lambda s: s.offspring > 0, self.species)
+        self.species = [s for s in self.species if s.offspring > 0]
         
         # Produce offspring
         # Stanley says he resets the innovations each generation, but
@@ -575,17 +576,17 @@ class NEATPopulation(SimplePopulation):
                 specie.members.append(child)
         
         if self.innovations:
-            self.global_innov = max(self.innovations.itervalues())            
+            self.global_innov = max(self.innovations.values())            
         
         self._gather_stats(pop)
         
     def _status_report(self):
         """ Print a status report """
         """ Prints a status report """
-        print "\n== Generation %d ==" % self.generation
-        print "Best (%.2f): %s %s" % (self.champions[-1].stats['fitness'], self.champions[-1], self.champions[-1].stats)
-        print "Solved: %s" % (self.solved_at)
-        print "Species: %s" % ([len(s.members) for s in self.species]) 
-        print "Age: %s" % ([s.age for s in self.species])
-        print "No improvement: %s" % ([s.no_improvement_age for s in self.species])
+        print("\n== Generation %d ==" % self.generation)
+        print("Best (%.2f): %s %s" % (self.champions[-1].stats['fitness'], self.champions[-1], self.champions[-1].stats))
+        print("Solved: %s" % (self.solved_at))
+        print("Species: %s" % ([len(s.members) for s in self.species])) 
+        print("Age: %s" % ([s.age for s in self.species]))
+        print("No improvement: %s" % ([s.no_improvement_age for s in self.species]))
         

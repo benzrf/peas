@@ -11,10 +11,10 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
-.. automodule:: peas.evolution.neat
+.. automodule:: peas.methods.neat
    :members:
    
-.. automodule:: peas.evolution.hyperneat
+.. automodule:: peas.methods.hyperneat
    :members:
 
 

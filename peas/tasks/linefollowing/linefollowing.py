@@ -13,7 +13,7 @@ import numpy as np
 from scipy.misc import imread
 
 # Local
-from ...networks.rnn import NeuralNetwork
+from peas.networks.rnn import NeuralNetwork
 
 # Shortcuts
 pi = np.pi
@@ -26,7 +26,7 @@ DATA_DIR = os.path.abspath(os.path.split(__file__)[0])
     
 def path_length(path):
     l = 0
-    for i in xrange(1, len(path)):
+    for i in range(1, len(path)):
         (x0, y0) = path[i-1]
         (x1, y1) = path[i]
         l += np.sqrt((x1-x0) ** 2 + (y1-y0) ** 2)
@@ -83,7 +83,8 @@ class Robot(object):
         for point in self.sensor_locations():
             yield self.field_at(point, observation=True)
 
-    def field_at(self, (x,y), border=1.0, observation=False):
+    def field_at(self, xxx_todo_changeme, border=1.0, observation=False):
+        (x,y) = xxx_todo_changeme
         if (0 <= x < self.field_friction.shape[1] and 
             0 <= y < self.field_friction.shape[0]):
             if observation:
@@ -116,7 +117,7 @@ class Robot(object):
         
     def draw(self, screen):
         import pygame
-        pygame.draw.lines(screen, (255,0,0), True, [(int(p.x), int(p.y)) for p in self.shape.get_points()])
+        pygame.draw.lines(screen, (255,0,0), True, [(int(p.x), int(p.y)) for p in self.shape.get_vertices()])
         
         lw, rw = self.wheel_locations(rel=False)
         pygame.draw.line(screen, (255, 0, 255), lw, lw + self.body.rotation_vector * 50. * self.l / self.motor_torque, 2)
@@ -148,7 +149,7 @@ class LineFollowingTask(object):
         self.force_global = force_global
         self.fieldpath = os.path.join(DATA_DIR,field) + '.png'
         self.observationpath = os.path.join(DATA_DIR,observation) + '.png'
-        print "Using %s" % (self.fieldpath,)
+        print("Using %s" % (self.fieldpath,))
         field_friction = imread(self.fieldpath)
         field_observation = imread(self.observationpath)
         self.path_resolution = path_resolution
@@ -201,7 +202,7 @@ class LineFollowingTask(object):
         if network.cm.shape[0] != (3*5 + 3*3 + 1):
             raise Exception("Network shape must be a 2 layer controller: 3x5 input + 3x3 hidden + 1 bias. Has %d." % network.cm.shape[0])
         
-        for step in xrange(self.max_steps):
+        for step in range(self.max_steps):
             
             net_input = np.array(list(robot.sensor_response()))
             # The nodes used for output are somewhere in the middle of the network
@@ -266,11 +267,11 @@ class LineFollowingTask(object):
         """ Visualize a solution strategy by the given individual. """
         import matplotlib.pyplot as plt
         self.evaluate(network, draw=False, drawname=filename)
-        print "Saving as " + os.path.join(os.getcwd(), filename)
+        print("Saving as " + os.path.join(os.getcwd(), filename))
         plt.figure()
         plt.imshow(self.field_observation * 0.2, cmap='Greys', vmin=0, vmax=1)
         for i in range(len(self.last_path)-1):
-            plt.plot(*zip(*self.last_path[i:i+2]), lw=4, alpha=0.3, color=(0.3,0,0.8))
+            plt.plot(*list(zip(*self.last_path[i:i+2])), lw=4, alpha=0.3, color=(0.3,0,0.8))
         plt.ylim(0,512)
         plt.xlim(0,512)
         plt.axis('off')

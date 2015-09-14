@@ -117,16 +117,16 @@ class NeuralNetwork(object):
         # Sort nodes: BIAS, INPUT, HIDDEN, OUTPUT, with HIDDEN sorted by feed-forward.
         nodes = dict((n.id, n) for n in chromosome.node_genes)
         node_order = ['bias']
-        node_order += [n.id for n in filter(lambda n: n.type == 'INPUT', nodes.values())]
+        node_order += [n.id for n in [n for n in list(nodes.values()) if n.type == 'INPUT']]
         if isinstance(chromosome, neat.chromosome.FFChromosome):
             node_order += chromosome.node_order
         else:
-            node_order += [n.id for n in filter(lambda n: n.type == 'HIDDEN', nodes.values())]
-        node_order += [n.id for n in filter(lambda n: n.type == 'OUTPUT', nodes.values())]
+            node_order += [n.id for n in [n for n in list(nodes.values()) if n.type == 'HIDDEN']]
+        node_order += [n.id for n in [n for n in list(nodes.values()) if n.type == 'OUTPUT']]
         # Construct object
         self.cm = np.zeros((len(node_order), len(node_order)))
         # Add bias connections
-        for id, node in nodes.items():
+        for id, node in list(nodes.items()):
             self.cm[node_order.index(id), 0] = node.bias
             self.cm[node_order.index(id), 1:] = node.response
         # Add the connections
@@ -242,7 +242,7 @@ class NeuralNetwork(object):
         # Sandwich networks only need to activate a single time
         if self.sandwich:
             propagate = 1
-        for _ in xrange(propagate):
+        for _ in range(propagate):
             act[:input_size] = input_activation.flat[:input_size]
             
             if self.sum_all_node_inputs:
@@ -254,7 +254,7 @@ class NeuralNetwork(object):
             if self.all_nodes_same_function:
                 act = node_types[0](nodeinputs)
             else:
-                for i in xrange(len(node_types)):
+                for i in range(len(node_types)):
                     act[i] = node_types[i](nodeinputs[i])
 
         self.act = act
@@ -266,7 +266,7 @@ class NeuralNetwork(object):
             return act.reshape(self.original_shape)
 
     def cm_string(self):
-        print "Connectivity matrix: %s" % (self.cm.shape,)
+        print("Connectivity matrix: %s" % (self.cm.shape,))
         cp = self.cm.copy()
         s = np.empty(cp.shape, dtype='a1')
         s[cp == 0] = ' '
@@ -329,6 +329,6 @@ if __name__ == '__main__':
     # import doctest
     # doctest.testmod(optionflags=doctest.ELLIPSIS)
     a = NeuralNetwork().from_matrix(np.array([[0,0,0],[0,0,0],[1,1,0]]))
-    print a.cm_string()
-    print a.feed(np.array([1,1]), add_bias=False)
+    print(a.cm_string())
+    print(a.feed(np.array([1,1]), add_bias=False))
     

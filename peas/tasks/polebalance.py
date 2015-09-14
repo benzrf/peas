@@ -9,7 +9,7 @@ import random
 import numpy as np
 
 # Local
-from ..networks.rnn import NeuralNetwork
+from peas.networks.rnn import NeuralNetwork
 
 class PoleBalanceTask(object):
     """ Double pole balancing task. 
@@ -112,7 +112,7 @@ class PoleBalanceTask(object):
             actions.append(action)
             states.append((x, dx, theta.copy(), dtheta.copy()))
             if verbose:
-                print states[-1]
+                print(states[-1])
         
         return steps, states, actions
         
@@ -159,7 +159,7 @@ class PoleBalanceTask(object):
         
         steps, _, _ = self._loop(network, max_steps=100000)
         if steps < 100000:
-            print "Failed 100k test with %d" % steps
+            print("Failed 100k test with %d" % steps)
             return 0
         successes = 0
         points = np.array([-0.9, -0.5, 0.0, 0.5, 0.9])
@@ -189,20 +189,20 @@ class PoleBalanceTask(object):
         steps, states, actions = self._loop(network, max_steps=1000)
         # TEMP STUFF
         actions = np.array(actions)
-        print actions.size, np.histogram(actions)[0]
+        print(actions.size, np.histogram(actions)[0])
         ##
-        x, dx, theta, dtheta = zip(*states)
+        x, dx, theta, dtheta = list(zip(*states))
         theta = np.vstack(theta).T
         dtheta = np.vstack(dtheta).T
         # The top plot (cart position)
         top = fig.add_subplot(211)
-        top.fill_between(range(len(x)), -self.h, self.h, facecolor='green', alpha=0.3)
+        top.fill_between(list(range(len(x))), -self.h, self.h, facecolor='green', alpha=0.3)
         top.plot(x, label=r'$x$')        
         top.plot(dx, label=r'$\delta x$')
         top.legend(loc='lower left', ncol=4, fancybox=True, bbox_to_anchor=(0, 0, 1, 1))
         # The bottom plot (pole angles)
         bottom = fig.add_subplot(212)
-        bottom.fill_between(range(theta.shape[1]), -self.r, self.r, facecolor='green', alpha=0.3)
+        bottom.fill_between(list(range(theta.shape[1])), -self.r, self.r, facecolor='green', alpha=0.3)
         for i, (t, dt) in enumerate(zip(theta, dtheta)):
             bottom.plot(t, label=r'$\theta_%d$'%i)
             bottom.plot(dt, ls='--', label=r'$\delta \theta_%d$'%i)
@@ -225,6 +225,6 @@ if __name__ == '__main__':
     
     while (np.abs(theta) < t.r).all():
         (x, dx, theta, dtheta) = t._step(0.5, (x, dx, theta, dtheta))
-        print theta
+        print(theta)
         
         

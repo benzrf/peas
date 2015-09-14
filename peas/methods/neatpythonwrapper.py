@@ -6,18 +6,19 @@
 """
 
 ### IMPORTS ###
-from __future__ import absolute_import
+
 import sys
 import os
 import pickle
 
 import numpy as np
+import collections
 
 try:
     from neat import config, chromosome, genome, population
 except ImportError:
-    print "This module requires neat-python to be installed,\n"\
-          "you can get it at http://code.google.com/p/neat-python/."
+    print("This module requires neat-python to be installed,\n"\
+          "you can get it at http://code.google.com/p/neat-python/.")
     raise
 
 class NEATPythonPopulation(object):
@@ -102,7 +103,7 @@ class NEATPythonPopulation(object):
     def epoch(self, evaluator, generations, solution=None):
         # Set config
         chromosome.node_gene_type = genome.NodeGene
-        for k, v in self.config.iteritems():
+        for k, v in self.config.items():
             setattr(config.Config, k, v)
 
         # neat-python has a max fitness threshold, we can set it if
@@ -139,7 +140,7 @@ class NEATPythonPopulation(object):
             if solution is not None:
                 if isinstance(solution, (int, float)):
                     solved = (self.champions[-1].neat_fitness >= solution)
-                elif callable(solution):
+                elif isinstance(solution, collections.Callable):
                     solved = solution(self.champions[-1])
                 elif hasattr(solution, 'solve'):
                     solved = solution.solve(self.champions[-1])

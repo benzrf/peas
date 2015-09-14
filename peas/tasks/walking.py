@@ -11,7 +11,7 @@ import pymunk
 import numpy as np
 
 # Local
-from ..networks.rnn import NeuralNetwork
+from peas.networks.rnn import NeuralNetwork
 
 # Shortcuts
 pi = np.pi
@@ -167,7 +167,7 @@ class WalkingTask(object):
             self.touching_floor = True
         space.add_collision_handler(1, 1, post_solve=oncollide)
         
-        for step in xrange(self.max_steps):
+        for step in range(self.max_steps):
             
             # Query network
             input_width = max(len(legs), 4)
@@ -203,7 +203,7 @@ class WalkingTask(object):
 
             # Draw
             if draw:
-                print act
+                print(act)
                 # Clear
                 screen.fill((255, 255, 255))
                 # Do all drawing

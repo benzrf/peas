@@ -25,7 +25,7 @@ def evaluate(individual, task, developer):
         stats['nodes'] = len(individual.node_genes)
     elif isinstance(individual, WaveletGenotype):
         stats['nodes'] = sum(len(w) for w in individual.wavelets)
-    print '~',
+    print('~', end=' ')
     sys.stdout.flush()
     return stats
     

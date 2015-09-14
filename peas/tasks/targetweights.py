@@ -12,7 +12,8 @@ from numpy.linalg import lstsq
 import scipy.misc
 
 # Local
-from ..networks.rnn import NeuralNetwork
+from peas.networks.rnn import NeuralNetwork
+import collections
 
 ### CLASSES ###
 
@@ -30,14 +31,14 @@ class TargetWeightsTask(object):
         # Build the connectivity matrix coords system
         cm_shape = list(substrate_shape) + list(substrate_shape)
         coords = np.mgrid[[slice(-1, 1, s*1j) for s in cm_shape]]
-        self.locs = coords.transpose(range(1,len(cm_shape)+1) + [0]).reshape(-1, len(cm_shape))
+        self.locs = coords.transpose(list(range(1,len(cm_shape)+1)) + [0]).reshape(-1, len(cm_shape))
         self.locs = np.hstack((self.locs, np.ones((self.locs.shape[0], 1))))
         # print self.locs
         cm = np.ones(cm_shape) * default_weight
         # Add weights
         for (where, what) in funcs:
-            mask = where(coords) if callable(where) else (np.ones(cm.shape, dtype=bool))
-            vals = what(coords, cm) if callable(what) else (what * np.ones(cm.shape))
+            mask = where(coords) if isinstance(where, collections.Callable) else (np.ones(cm.shape, dtype=bool))
+            vals = what(coords, cm) if isinstance(what, collections.Callable) else (what * np.ones(cm.shape))
             cm[mask] = vals[mask]
             
         # Add noise
@@ -113,4 +114,4 @@ class TargetWeightsTask(object):
         
 if __name__ == '__main__':
     task = TargetWeightsTask()
-    print task.target
+    print(task.target)

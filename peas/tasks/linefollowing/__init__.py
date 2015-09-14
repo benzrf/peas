@@ -1,3 +1,3 @@
-from linefollowing import LineFollowingTask
+from .linefollowing import LineFollowingTask
 
 __all__ = ['LineFollowingTask']

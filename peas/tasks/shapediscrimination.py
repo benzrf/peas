@@ -62,11 +62,11 @@ class ShapeDiscriminationTask(object):
         if self.distractors is None:
             self.distractors = [self.makeshape('box', 1)]
             
-        print ":::: Target Shape ::::"
-        print self.target
-        print ":::: Distractor Shapes ::::"
+        print(":::: Target Shape ::::")
+        print(self.target)
+        print(":::: Distractor Shapes ::::")
         for d in self.distractors:
-            print d
+            print(d)
         
     @classmethod
     def makeshape(cls, shape, size=5):
@@ -109,7 +109,7 @@ class ShapeDiscriminationTask(object):
         correct = 0.0
         wsose = 0.0
         pattern = np.zeros((self.size, self.size))
-        for _ in xrange(self.trials):
+        for _ in range(self.trials):
             pattern *= 0.0
             targetsize = self.target.shape[0]
             distractor = random.choice(self.distractors)
@@ -119,7 +119,7 @@ class ShapeDiscriminationTask(object):
             pattern[x:x+targetsize, y:y+targetsize] = self.target
             cx, cy = x + targetsize // 2, y + targetsize // 2
         
-            for i in xrange(100):
+            for i in range(100):
                 x, y = np.random.randint(self.size - distsize, size=2)
                 if not np.any(pattern[x:x+distsize, y:y+distsize]):
                     pattern[x:x+distsize, y:y+distsize] = distractor

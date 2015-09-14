@@ -9,7 +9,7 @@ import random
 import numpy as np
 
 # Local
-from ..networks.rnn import NeuralNetwork
+from peas.networks.rnn import NeuralNetwork
 
 
 class XORTask(object):
@@ -33,7 +33,7 @@ class XORTask(object):
         if not network.node_types[-1](-1000) < -0.95:
             raise Exception("Network should be able to output value of -1, e.g. using a tanh node.")
         
-        pairs = zip(self.INPUTS, self.OUTPUTS)
+        pairs = list(zip(self.INPUTS, self.OUTPUTS))
         random.shuffle(pairs)
         if not self.do_all:
             pairs = [random.choice(pairs)]
@@ -48,13 +48,13 @@ class XORTask(object):
             err = (err ** 2).mean()
             # Add error
             if verbose:
-                print "%r -> %r (%.2f)" % (i, output, err)
+                print("%r -> %r (%.2f)" % (i, output, err))
             rmse += err 
 
         score = 1/(1+np.sqrt(rmse / len(pairs)))
         return {'fitness': score}
         
     def solve(self, network):
-        return int(self.evaluate(network) > 0.9)
+        return int(self.evaluate(network)['fitness'] > 0.9)
                 
         

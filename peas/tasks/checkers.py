@@ -117,7 +117,7 @@ class CheckersTask(object):
         fitness = []
         current, next = player, opponent
         i = 0
-        print "Running checkers game..."
+        print("Running checkers game...")
         while not game.game_over():
             i += 1
             move = current.pickmove(game)
@@ -127,17 +127,17 @@ class CheckersTask(object):
             sys.stdout.write('.')
             sys.stdout.flush()
 
-        print
-        print game
+        print()
+        print(game)
         # Fitness over last 100 episodes
         fitness.extend([gamefitness(game)] * (100 - len(fitness)))
         fitness = fitness[-100:]
-        print fitness
+        print(fitness)
         score = sum(fitness)
         won = game.winner() >= 1.0
         if won:
             score += 30000
-        print "\nGame finished in %d turns. Winner: %s. Score: %s" % (i,game.winner(), score)
+        print("\nGame finished in %d turns. Winner: %s. Score: %s" % (i,game.winner(), score))
         return {'fitness':score, 'won': won}
 
     def play_against(self, network):
@@ -149,20 +149,20 @@ class CheckersTask(object):
         fitness = [gamefitness(game)] * 100
         
         i = 0
-        print "Running checkers game..."
+        print("Running checkers game...")
         while not game.game_over():
             i += 1
             move = player.pickmove(game)
-            print move
+            print(move)
             game.play(move)
 
-            print game
-            print NUMBERING
-            print "enter move"
+            print(game)
+            print(NUMBERING)
+            print("enter move")
             moved = False
             while not moved:
                 try:
-                    user_input = raw_input()
+                    user_input = input()
                     if 'q' in user_input:
                         sys.exit()
                     if ' ' in user_input:
@@ -172,15 +172,15 @@ class CheckersTask(object):
                     game.play(move)
                     moved = True
                 except IllegalMoveError:
-                    print "Illegal move"
+                    print("Illegal move")
             
             
-        print game
+        print(game)
         score = sum(fitness)
         won = game.winner() >= 1.0
         if won:
             score += 30000
-        print "\nGame finished in %d turns. Winner: %s. Score: %s" % (i,game.winner(), score)
+        print("\nGame finished in %d turns. Winner: %s. Score: %s" % (i,game.winner(), score))
         return {'fitness':score, 'won': won}
 
     def solve(self, network):
@@ -211,7 +211,7 @@ class HeuristicOpponent(object):
         moves = list(board.all_moves())
         # If there is only one possible move, don't search, just move.
         if len(moves) == 1:
-            if verbose: print "0 evals."
+            if verbose: print("0 evals.")
             return moves[0]
         for move in moves:
             evals = [0]
@@ -224,7 +224,7 @@ class HeuristicOpponent(object):
         # Pick second best move
         if secondbest is not None and self.handicap > 0 and random.random() < self.handicap:
             return secondbest
-        if verbose: print "%d evals." % evals[0]
+        if verbose: print("%d evals." % evals[0])
         return bestmove
 
 class SimpleHeuristic(object):
@@ -346,8 +346,8 @@ class SimpleHeuristic(object):
         val += (bk - wk) * kev
 
         tempo = 0
-        for i in xrange(8):
-            for j in xrange(8):
+        for i in range(8):
+            for j in range(8):
                 if board[i,j] == BLACK|MAN:
                     tempo += i
                 elif board[i,j] == WHITE|MAN:
@@ -372,8 +372,8 @@ class SimpleHeuristic(object):
         stonesinsystem = 0
         if nwm + nwk - nbk - nbm == 0:
             if game.to_move == BLACK:
-                for row in xrange(0, 8, 2):
-                    for c in xrange(0, 8, 2):
+                for row in range(0, 8, 2):
+                    for c in range(0, 8, 2):
                         if board[row,c] != FREE:
                             stonesinsystem += 1
                 if stonesinsystem % 2:
@@ -387,8 +387,8 @@ class SimpleHeuristic(object):
                     if nm + nk <= 8: val -= 2
                     if nm + nk <= 6: val -= 2
             else:
-                for row in xrange(1, 8, 2):
-                    for c in xrange(1, 8, 2):
+                for row in range(1, 8, 2):
+                    for c in range(1, 8, 2):
                         if board[row,c] != FREE:
                             stonesinsystem += 1
                 if stonesinsystem % 2:
@@ -477,7 +477,7 @@ class Checkers(object):
         captures_possible = False
         pieces = []
         # Check for possible captures first:
-        for n, (y,x) in INVNUM.iteritems():
+        for n, (y,x) in INVNUM.items():
             piece = self.board[y, x]
             if piece & self.to_move:
                 pieces.append((n, (y, x), piece))
@@ -512,7 +512,7 @@ class Checkers(object):
                                 dist += 1
 
     
-    def captures(self, (py, px), piece, board, captured=[], start=None):
+    def captures(self, xxx_todo_changeme, piece, board, captured=[], start=None):
         """ Return a list of possible capture moves for given piece in a 
             checkers game. 
 
@@ -522,6 +522,7 @@ class Checkers(object):
             :param captured: list of already-captured pieces (can't jump twice)
             :param start: from where this capture chain started.
             """
+        (py, px) = xxx_todo_changeme
         if start is None:
             start = (py, px)
         opponent = BLACK if piece & WHITE else WHITE
@@ -571,7 +572,7 @@ class Checkers(object):
         for (py, px) in positions[1:]:
             ydir = 1 if py > ly else -1
             xdir = 1 if px > lx else -1
-            for y, x in zip(xrange(ly + ydir, py, ydir),xrange(lx + xdir, px, xdir)):
+            for y, x in zip(range(ly + ydir, py, ydir),range(lx + xdir, px, xdir)):
                 if self.board[y,x] != EMPTY:
                     self.board[y,x] = EMPTY
                     if self.minefield and 2 <= x < 6 and 2 <= y < 6:
@@ -605,11 +606,11 @@ class Checkers(object):
     def check_draw(self, verbose=False):
         # If there were no captures in the last [30] moves, draw.
         i = 0
-        for i in xrange(len(self.caphistory)):
+        for i in range(len(self.caphistory)):
             if self.caphistory[-(i+1)]:
                 break
         if verbose:
-            print "Last capture: %d turns ago." % (i)
+            print("Last capture: %d turns ago." % (i))
         return (i > self.non_capture_draw)
         
     def game_over(self):
@@ -663,13 +664,13 @@ if __name__ == '__main__':
         i = 0
         while not game.game_over():
             i += 1
-            print game
-            print NUMBERING
-            print "enter move"
+            print(game)
+            print(NUMBERING)
+            print("enter move")
             moved = False
             while not moved:
                 try:
-                    user_input = raw_input()
+                    user_input = input()
                     if 'q' in user_input:
                         sys.exit()
                     if ' ' in user_input:
@@ -679,12 +680,12 @@ if __name__ == '__main__':
                     game.play(move)
                     moved = True
                 except IllegalMoveError:
-                    print "Illegal move"
+                    print("Illegal move")
 
             move = opponent.pickmove(game)
-            print move
+            print(move)
             game.play(move)
             
         scores.append(gamefitness(game))
-    print (time.time() - tic) / n
-    print 'Score', scores
+    print((time.time() - tic) / n)
+    print('Score', scores)

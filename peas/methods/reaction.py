@@ -9,8 +9,8 @@ import numpy as np
 import scipy.ndimage.filters
 
 # Local
-from ..methods.neat import NEATGenotype
-from ..networks import NeuralNetwork
+from peas.methods.neat import NEATGenotype
+from peas.networks import NeuralNetwork
 
 np.seterr(divide='raise')
 
@@ -78,12 +78,12 @@ class ReactionDeveloper(object):
         for _ in range(self.reaction_steps):
             cm = np.dot(w, cm.reshape((-1, n_elems)).T)
             cm = np.clip(cm, self.cm_range[0], self.cm_range[1])
-            for el in xrange(cm.shape[0]):
+            for el in range(cm.shape[0]):
                 cm[el,:] = f[el](cm[el,:])
             cm = cm.T.reshape(shape)            
             # apply diffusion
             laplacian[:] = 0.0
-            for ax in xrange(cm.ndim - 1):
+            for ax in range(cm.ndim - 1):
                 laplacian += scipy.ndimage.filters.convolve1d(cm[..., frozen:], kernel, axis=ax, mode='constant')
             cm[..., frozen:] += laplacian
             self._steps.append(cm[...,-1])
@@ -98,5 +98,5 @@ class ReactionDeveloper(object):
         
     def visualize(self, genotype, filename):
         self.convert(genotype)
-        visualization.image_grid(map(visualization.conmat_to_im, self._steps)).save(filename)
+        visualization.image_grid(list(map(visualization.conmat_to_im, self._steps))).save(filename)
         

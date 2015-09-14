@@ -14,6 +14,7 @@ from collections import defaultdict
 
 # Libs
 import numpy as np
+import collections
 np.seterr(over='warn', divide='raise')
 
 # Package
@@ -24,8 +25,9 @@ inf  = float('inf')
 
 ### FUNCTIONS ###
 
-def evaluate_individual((individual, evaluator)):
-    if callable(evaluator):
+def evaluate_individual(xxx_todo_changeme):
+    (individual, evaluator) = xxx_todo_changeme
+    if isinstance(evaluator, collections.Callable):
         individual.stats = evaluator(individual)
     elif hasattr(evaluator, 'evaluate'):
         individual.stats = evaluator.evaluate(individual)
@@ -84,7 +86,7 @@ class SimplePopulation(object):
         if reset:
             self._reset()
         
-        for _ in xrange(generations):
+        for _ in range(generations):
             self._evolve(evaluator, solution)
 
             self.generation += 1
@@ -129,11 +131,11 @@ class SimplePopulation(object):
         """
         to_eval = [(individual, evaluator) for individual in pop]
         if self.pool is not None:
-            print "Running in %d processes." % self.pool._processes
+            print("Running in %d processes." % self.pool._processes)
             pop = self.pool.map(evaluate_individual, to_eval)
         else:
-            print "Running in single process."
-            pop = map(evaluate_individual, to_eval)
+            print("Running in single process.")
+            pop = list(map(evaluate_individual, to_eval))
         
         return pop
     
@@ -148,7 +150,7 @@ class SimplePopulation(object):
         if solution is not None:
             if isinstance(solution, (int, float)):
                 solved = (self.champions[-1].stats['fitness'] >= solution)
-            elif callable(solution):
+            elif isinstance(solution, collections.Callable):
                 solved = solution(self.champions[-1])
             elif hasattr(solution, 'solve'):
                 solved = solution.solve(self.champions[-1])
@@ -187,7 +189,7 @@ class SimplePopulation(object):
         
     def _status_report(self):
         """ Prints a status report """
-        print "\n== Generation %d ==" % self.generation
-        print "Best (%.2f): %s %s" % (self.champions[-1].stats['fitness'], self.champions[-1], self.champions[-1].stats)
-        print "Solved: %s" % (self.solved_at)
+        print("\n== Generation %d ==" % self.generation)
+        print("Best (%.2f): %s %s" % (self.champions[-1].stats['fitness'], self.champions[-1], self.champions[-1].stats))
+        print("Solved: %s" % (self.solved_at))
         
