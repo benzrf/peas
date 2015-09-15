@@ -45,13 +45,13 @@ class ObstacleCourseTask:
             course = ObstacleCourse(grid, net)
             while course.steps < 1000 and course.y < 999 and not course.collides():
                 course.tick()
-            score = course.y
-            if course.y == 999:
-                score += 1000 - course.steps
-            else:
+            if course.y != 999:
                 solved = False
-            scores.append(score)
-        return {'fitness': min(scores), 'solved': solved}
+            scores.append(course.y)
+        scores.sort()
+        weights = range(len(scores), 0, -1)
+        avg = sum(w * s for w, s in zip(weights, scores)) / sum(weights)
+        return {'fitness': avg, 'solved': solved}
 
     def solve(self, net):
         return self.evaluate(net)['solved']
@@ -102,7 +102,10 @@ def do_evo(gens):
     task = ObstacleCourseTask(grids)
     factory = lambda: neat.NEATGenotype(inputs=8, outputs=2)
     pop = neat.NEATPopulation(factory)
-    results = pop.epoch(generations=gens, evaluator=task, solution=task)
+    try:
+        results = pop.epoch(generations=gens, evaluator=task, solution=task)
+    except KeyboardInterrupt:
+        results = None
     return (results, pop)
 
 def trace(net, f, steps):
@@ -114,6 +117,8 @@ def trace(net, f, steps):
     pix = im.load()
     for _ in range(steps):
         course.tick()
+        if course.collides():
+            break
         pix[course.x, course.y] = (255, 0, 0)
     return im
 
